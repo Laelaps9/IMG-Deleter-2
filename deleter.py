@@ -18,27 +18,76 @@ def get_images(path):
     images = []
     for file in files:
         if (".png" in file or ".jpg" in file):
-            images.append(file)
+            images.append(os.path.join(path, file))
     return images
 
-def simple_deletion(path, images):
-    print("Simple Deletion")
-    for name in images:
-        fullPath = os.path.join(path, name)
-        print(fullPath)
-        img = cv2.imread(fullPath)
-        cv2.imshow(name, img)
-        cv2.waitKey(0)
+def define_keys(skip, delete, prevImg, nextImg, stop):
+    global switch 
+    switch = {
+            # represents images to skip
+            ord(skip): "Skip",
+            # represents images marked for deletion
+            ord(delete): "Delete",
+            #
+            ord(prevImg):"Previous Image",
+            #
+            ord(nextImg):"Next Image",
+            #
+            ord(stop):"Stop"
+            }
+
+def get_keys():
+    global config
+    config = []
+    f = open("keys.conf", "r")
+    lines = f.readlines()
+    for line in lines:
+        if("skip:" in line):
+            skip = line.split(":")[1].strip(" \n")
+            continue
+        if("delete:" in line):
+            delete = line.split(":")[1].strip(" \n")
+            continue
+        if("previous:" in line):
+            prevImg = line.split(":")[1].strip(" \n")
+            continue
+        if("next:" in line):
+            nextImg = line.split(":")[1].strip(" \n")
+            continue
+        if("stop:" in line):
+            stop = line.split(":")[1].strip(" \n")
+    
+    define_keys(skip, delete, prevImg, nextImg, stop)
+
+def quick_deletion(images):
+    print("Quick Deletion")
+    # Array that will specify which images are deleted
+    toDelete = []
+    for i, image in enumerate(images):
+        img = cv2.imread(image)
+        cv2.imshow(image, img)
+        k = cv2.waitKey(0)
+        flag = switch.get(k)
+        while (flag != "Skip" and flag != "Delete"):
+            print("Invalid option")
+            k = cv2.waitKey(0)
+            flag = switch.get(k)
+        
         cv2.destroyAllWindows()
+        if(flag == "Skip"):
+            print("Skip")
+            continue
+        elif(flag == "Delete"):
+            print("Delete")
+            toDelete.append(image)
 
 def duplicate_deletion():
     print("Duplicate Deletion")
 
-def get_deletion(option, path, images):
+def get_deletion(option, images):
     if(option == 1):
-        simple_deletion(path, images)
+        quick_deletion(images)
     elif(option == 2):
-        print("Option 2")
         duplicate_deletion()
     else:
         print_help("Invalid Option")
@@ -57,10 +106,10 @@ images = get_images(path)
 
 option = int(input("""
 Select a deletion mode (number):
-1. Simple deletion
-2. Duplicate deletion
+1. Quick Deletion
+2. Duplicate Deletion
 """))
 
-get_deletion(option, path, images)
-
+get_keys()
+get_deletion(option, images)
 #os.remove(test)
