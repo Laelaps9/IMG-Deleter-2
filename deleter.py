@@ -64,24 +64,27 @@ def associate_images(images, marks):
 def compare_images(img1, img2):
     # First check if the images have the same dimensions
     if img1.shape != img2.shape:
-        return -1
+        return False
 
     # Compare images using structural similarity index
     s = ssim(img1, img2)
-   
-    fig = plt.figure("Comparison")
-    plt.suptitle("SSIM: %.2f" % s)
-    ax = fig.add_subplot(1, 2, 1)
-    plt.imshow(img1, cmap = plt.cm.gray)
-    plt.axis("off")
 
-    ax = fig.add_subplot(1, 2, 2)
-    plt.imshow(img2, cmap = plt.cm.gray)
-    plt.axis("off")
+    if s >= threshold:
+        fig = plt.figure("Comparison")
+        plt.suptitle("SSIM: %.2f" % s)
+        ax = fig.add_subplot(1, 2, 1)
+        plt.imshow(img1, cmap = plt.cm.gray)
+        plt.axis("off")
 
-    plt.show()
+        ax = fig.add_subplot(1, 2, 2)
+        plt.imshow(img2, cmap = plt.cm.gray)
+        plt.axis("off")
 
-    return s
+        plt.show()
+
+        return True
+
+    return False
 
 def delete_images(images):
     print("\nImages to be deleted (" + str(len(images)) + "):")
@@ -164,13 +167,15 @@ def quick_deletion(images):
 
 def duplicate_deletion(images):
     for i, image in enumerate(images):
+        print("Checking " + str(i + 1) + " of " + str(len(images)))
         duplicates = []
         img1 = cv2.imread(image)
         img1Gray = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
-        for image in images[i + 1:]:
+        for j, image in enumerate(images[i + 1:]):
+            print(str(j + 1) + "/" + str(len(images)) + " " + image)
             img2 = cv2.imread(image)
             img2Gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
-            if compare_images(img1Gray, img2Gray) >= threshold:
+            if compare_images(img1Gray, img2Gray):
                 duplicates.append(image)
                 images.remove(image)
         if len(duplicates) > 0:
@@ -196,6 +201,7 @@ else:
     path = args[0]
 
 images = get_images(path)
+print(images)
 
 option = int(input("""
 Select a deletion mode (number):
