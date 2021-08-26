@@ -1,6 +1,9 @@
 import sys
 import os
 import cv2
+from skimage.metrics import structural_similarity as ssim
+import matplotlib.pyplot as plt
+import numpy as np
 
 def print_help(msg):
     print("\n" + msg)
@@ -37,9 +40,9 @@ def define_keys(skip, delete, prevImg, nextImg, stop):
             }
 
 def get_keys():
-    global config, keySkip, keyDelete, keyPrev, keyNext, keyStop
+    global config, keySkip, keyDelete, keyPrev, keyNext, keyStop, threshold
     config = []
-    f = open("keys.conf", "r")
+    f = open("config", "r")
     lines = f.readlines()
     for line in lines:
         if "skip:" in line:
@@ -61,7 +64,9 @@ def get_keys():
         if "stop:" in line:
             keyStop = line
             stop = line.split(":")[1].strip(" \n")
-    
+        if "comp_threshold" in line:
+            threshold = float(line.split(":")[1].strip(" \n"))
+
     define_keys(skip, delete, prevImg, nextImg, stop)
 
 def associate_images(images, marks):
@@ -71,6 +76,28 @@ def associate_images(images, marks):
             toDelete.append(images[i])
 
     delete_images(toDelete)
+
+def compare_images(img1, img2):
+    # First check if the images have the same dimensions
+    if img1.shape != img2.shape:
+        return -1
+
+    # Compare images using structural similarity index
+    s = ssim(img1, img2)
+   
+    fig = plt.figure("Comparison")
+    plt.suptitle("SSIM: %.2f" % s)
+    ax = fig.add_subplot(1, 2, 1)
+    plt.imshow(img1, cmap = plt.cm.gray)
+    plt.axis("off")
+
+    ax = fig.add_subplot(1, 2, 2)
+    plt.imshow(img2, cmap = plt.cm.gray)
+    plt.axis("off")
+
+    plt.show()
+
+    return s
 
 def delete_images(images):
     print("\nImages to be deleted (" + str(len(images)) + "):")
@@ -167,8 +194,19 @@ def normal_deletion(images):
 
     associate_images(images, marks)
 
-def duplicate_deletion():
-    print("Duplicate Deletion")
+def duplicate_deletion(images):
+    for i, image in enumerate(images):
+        duplicates = []
+        img1 = cv2.imread(image)
+        img1Gray = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+        for image in images[i + 1:]:
+            img2 = cv2.imread(image)
+            img2Gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+            if compare_images(img1Gray, img2Gray) >= threshold:
+                duplicates.append(image)
+                images.remove(image)
+        if len(duplicates) > 0:
+            delete_images(duplicates)
 
 def get_deletion(option, images):
     if option == 1:
@@ -176,7 +214,7 @@ def get_deletion(option, images):
     elif option == 2:
         normal_deletion(images)
     elif option == 3:
-        duplicate_deletion
+        duplicate_deletion(images)
     else:
         print_help("Invalid Option")
 

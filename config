@@ -1,0 +1,18 @@
+# Skip image
+skip: j
+
+# Mark for deletion
+delete: k
+
+# Movement
+previous: h
+next: l
+
+# Complete
+stop: s
+
+# Comparison threshold (between -1 and 1).
+# A value of -1 means that the images are completely different
+# A value of 1 means that the images are perfectly similar
+# Images with a value above the threshold will be considered duplicates
+comp_threshold: 0.9
