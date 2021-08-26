@@ -73,6 +73,8 @@ def get_config():
         if "comp_threshold:" in line:
             threshold = float(line.split(":")[1].strip(" \n"))
 
+    define_keys(skip, delete, prevImg, nextImg, stop)
+
 def associate_images(images, marks):
     toDelete = []
     for i, mark in enumerate(marks):
