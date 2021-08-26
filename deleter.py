@@ -36,10 +36,10 @@ def define_keys(skip, delete, prevImg, nextImg, stop):
             ord(stop):"Stop"
             }
 
-def get_keys():
-    global config, keySkip, keyDelete, keyPrev, keyNext, keyStop
+def get_config():
+    global config, keySkip, keyDelete, keyPrev, keyNext, keyStop, posX, posY
     config = []
-    f = open("keys.conf", "r")
+    f = open("config", "r")
     lines = f.readlines()
     for line in lines:
         if "skip:" in line:
@@ -61,6 +61,11 @@ def get_keys():
         if "stop:" in line:
             keyStop = line
             stop = line.split(":")[1].strip(" \n")
+            continue
+        if "position:" in line:
+            positions = line.split(":")[1].strip(" \n").split("x")
+            posX = int(positions[0])
+            posY = int(positions[1])
     
     define_keys(skip, delete, prevImg, nextImg, stop)
 
@@ -92,11 +97,12 @@ def quick_deletion(images):
     print("Quick Deletion")
     # Array that will specify which images are deleted
     toDelete = []
-    cv2.namedWindow("img")
+    cv2.namedWindow("img", cv2.WINDOW_NORMAL)
     validFlags = ["Skip", "Delete", "Stop"]
     for image in images:
         img = cv2.imread(image)
         cv2.imshow("img", img)
+        cv2.moveWindow("img", posX, posY)
         k = cv2.waitKey(0)
         flag = switch.get(k)
         while flag not in validFlags:
@@ -200,5 +206,5 @@ Select a deletion mode (number):
 3. Duplicate Deletion
 """))
 
-get_keys()
+get_config()
 get_deletion(option, images)

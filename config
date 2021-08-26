@@ -10,3 +10,7 @@ next: l
 
 # Complete
 stop: s
+
+# Image Position
+# Shows where the image will be displayed
+position: 0x0
