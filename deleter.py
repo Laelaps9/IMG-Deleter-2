@@ -21,13 +21,12 @@ def get_images(path):
             images.append(os.path.join(path, file))
     return images
 
-def define_keys(skip, delete, prevImg, nextImg, stop):
+def define_keys(unmark, mark, prevImg, nextImg, stop):
     global switch 
     switch = {
-            # key pressed to skip an image
-            ord(skip): "Skip",
+            ord(unmark): "Unmark",
             # key pressed to mark an image for deletion
-            ord(delete): "Delete",
+            ord(mark): "Mark",
             # key to go back to the previous image
             ord(prevImg):"Previous",
             # key to move on to the next image
@@ -37,18 +36,18 @@ def define_keys(skip, delete, prevImg, nextImg, stop):
             }
 
 def get_config():
-    global config, keySkip, keyDelete, keyPrev, keyNext, keyStop, posX, posY
+    global config, keyUnmark, keyMark, keyPrev, keyNext, keyStop, posX, posY
     config = []
     f = open("config", "r")
     lines = f.readlines()
     for line in lines:
-        if "skip:" in line:
-            keySkip = line
-            skip = line.split(":")[1].strip(" \n")
+        if "unmark:" in line:
+            keyUnmark = line
+            unmark = line.split(":")[1].strip(" \n")
             continue
-        if "delete:" in line:
-            keyDelete = line
-            delete = line.split(":")[1].strip(" \n")
+        if "mark:" in line:
+            keyMark = line
+            mark = line.split(":")[1].strip(" \n")
             continue
         if "previous:" in line:
             keyPrev = line
@@ -67,7 +66,7 @@ def get_config():
             posX = int(positions[0])
             posY = int(positions[1])
     
-    define_keys(skip, delete, prevImg, nextImg, stop)
+    define_keys(unmark, mark, prevImg, nextImg, stop)
 
 def associate_images(images, marks):
     toDelete = []
@@ -98,7 +97,7 @@ def quick_deletion(images):
     # Array that will specify which images are deleted
     toDelete = []
     cv2.namedWindow("img", cv2.WINDOW_NORMAL)
-    validFlags = ["Skip", "Delete", "Stop"]
+    validFlags = ["Unmark", "Mark", "Stop"]
     for image in images:
         img = cv2.imread(image)
         cv2.imshow("img", img)
@@ -107,8 +106,8 @@ def quick_deletion(images):
         flag = switch.get(k)
         while flag not in validFlags:
             print("Invalid option")
-            print("\t" + keySkip, 
-                  "\t" + keyDelete, 
+            print("\t" + keyUnmark, 
+                  "\t" + keyMark, 
                   "\t" + keyStop)
             k = cv2.waitKey(0)
             flag = switch.get(k)
@@ -128,7 +127,7 @@ def quick_deletion(images):
 def normal_deletion(images):
     print("Normal Deletion")
     marks = [0 for i in range(len(images))]
-    validFlags = ["Skip", "Delete", "Stop", "Previous", "Next" ]
+    validFlags = ["Unmark", "Mark", "Stop", "Previous", "Next" ]
     i = 0
     while i < len(images):
         img = cv2.imread(images[i])
@@ -137,19 +136,19 @@ def normal_deletion(images):
         flag = switch.get(k)
         while flag not in validFlags:
             print("Invalid option")
-            print("\t" + keySkip, 
-                  "\t" + keyDelete, 
+            print("\t" + keyUnmark, 
+                  "\t" + keyMark, 
                   "\t" + keyPrev, 
                   "\t" + keyNext, 
                   "\t" + keyStop)
             k = cv2.waitKey(0)
             flag = switch.get(k)
 
-        if flag == "Skip":
+        if flag == "Unmark":
             print("Unmarked for deletion")
             marks[i] = 0
             continue
-        if flag == "Delete":
+        if flag == "Mark":
             print("Marked for deletion")
             marks[i] = 1
             continue

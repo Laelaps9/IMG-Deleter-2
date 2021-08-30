@@ -1,8 +1,8 @@
-# Skip image
-skip: j
+# Unmark for deletion
+unmark: j
 
 # Mark for deletion
-delete: k
+mark: k
 
 # Movement
 previous: h
