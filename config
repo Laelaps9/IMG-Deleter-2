@@ -13,7 +13,7 @@ stop: s
 
 # Image Position
 # Shows where the image will be displayed
-position: 0x0
+position: 1366x0
 
 # Comparison threshold (between -1 and 1).
 # A value of -1 means that the images are completely different
